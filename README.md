@@ -261,10 +261,13 @@ npm test
 ✅ [PASS] File moved to Trash
 ✅ [PASS] Trashed item appears in Trash view
 ✅ [PASS] Item successfully restored from Trash
+✅ [PASS] Batch download multi-selection as ZIP archive succeeds
+✅ [PASS] Batch star operation succeeds across multiple items
+✅ [PASS] Batch move operation moves selected items to target folder
 ✅ [PASS] Permanent file deletion purges record and frees disk storage
 
 ====================================================
-🎉 TEST SUMMARY: 23 passed, 0 failed
+🎉 TEST SUMMARY: 26 passed, 0 failed
 ====================================================
 ```
 
