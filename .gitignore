@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+*.log
+drive.db-shm
+drive.db-wal
+.DS_Store

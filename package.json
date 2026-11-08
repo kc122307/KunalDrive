@@ -1,0 +1,15 @@
+{
+  "name": "google-drive-clone",
+  "version": "1.0.0",
+  "description": "Full-featured Google Drive clone built with React, TypeScript, Vite, Tailwind CSS, Node.js, Express, and persistent storage.",
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "build:client": "npm run build --prefix client",
+    "test": "npm test --prefix server"
+  },
+  "keywords": ["google-drive", "cloud-storage", "react", "express", "sqlite", "zustand", "tailwind"],
+  "author": "",
+  "license": "ISC"
+}

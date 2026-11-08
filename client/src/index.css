@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply select-none;
+  }
+}
+
+/* Custom Google Drive Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dadce0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #bdc1c6;
+}
+
+/* Custom animation for modal backdrop */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.15s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
