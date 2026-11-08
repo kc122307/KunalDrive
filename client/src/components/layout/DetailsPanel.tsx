@@ -113,3 +113,4 @@ export const DetailsPanel: React.FC = () => {
     </aside>
   );
 };
+

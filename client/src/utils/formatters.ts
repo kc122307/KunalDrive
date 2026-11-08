@@ -30,3 +30,4 @@ export function formatDate(dateString: string): string {
   
   return date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
 }
+

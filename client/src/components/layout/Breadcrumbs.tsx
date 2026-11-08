@@ -87,18 +87,40 @@ export const Breadcrumbs: React.FC = () => {
             )}
 
             <button
-              onClick={() => {
-                if (selectedItem) {
-                  const token = localStorage.getItem('token');
+              onClick={async () => {
+                const token = localStorage.getItem('token');
+                if (selectedIds.length === 1 && selectedItem) {
                   if (selectedItem.is_folder) {
                     window.open(`/api/folders/${selectedItem.id}/download-zip?token=${token}`, '_blank');
                   } else {
                     window.open(`/api/files/${selectedItem.id}/download?token=${token}`, '_blank');
                   }
+                } else if (selectedIds.length > 1) {
+                  try {
+                    const response = await fetch('/api/files/download-batch', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                      },
+                      body: JSON.stringify({ ids: selectedIds })
+                    });
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Drive_Selected_${selectedIds.length}_Items.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                  } catch (e) {
+                    console.error('Batch download error', e);
+                  }
                 }
               }}
               className="p-2 rounded-full hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors"
-              title="Download"
+              title={selectedIds.length > 1 ? `Download ${selectedIds.length} items (ZIP)` : 'Download'}
             >
               <Download className="w-5 h-5" />
             </button>
@@ -196,3 +218,4 @@ export const Breadcrumbs: React.FC = () => {
     </div>
   );
 };
+

@@ -39,3 +39,4 @@ export function getFileCategoryIcon(category: FileCategory, className = 'w-5 h-5
       return <FileGeneric className={`${className} text-[#5f6368]`} />;
   }
 }
+

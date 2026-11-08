@@ -15,7 +15,10 @@ import {
   restoreFile,
   deleteFilePermanent,
   emptyTrash,
-  searchFiles
+  searchFiles,
+  downloadBatchZip,
+  batchMove,
+  batchStar
 } from '../controllers/fileController.js';
 import { authenticate, optionalAuthenticate } from '../middleware/auth.js';
 import { uploadMiddleware } from '../middleware/upload.js';
@@ -38,6 +41,9 @@ router.post('/upload', uploadMiddleware.array('files', 50), uploadFiles);
 router.post('/upload/init', resumableInit);
 
 router.post('/trash/empty', emptyTrash);
+router.post('/download-batch', downloadBatchZip);
+router.post('/batch-move', batchMove);
+router.post('/batch-star', batchStar);
 
 router.get('/:id', getFileDetails);
 router.patch('/:id/rename', renameFile);
@@ -49,3 +55,4 @@ router.post('/:id/restore', restoreFile);
 router.delete('/:id/permanent', deleteFilePermanent);
 
 export default router;
+

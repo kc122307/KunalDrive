@@ -317,3 +317,4 @@ npm test
    - `CORS_ORIGIN=https://your-frontend-domain.com`
 2. Ensure the `server/storage/uploads` and `server/data` volumes are configured as persistent disk mounts so files and database survive container restarts.
 3. Start command: `node src/index.js`.
+

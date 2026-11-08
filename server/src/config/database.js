@@ -87,3 +87,4 @@ CREATE TABLE IF NOT EXISTS upload_sessions (
 `);
 
 console.log(`[Database] SQLite connected at ${DB_PATH}`);
+

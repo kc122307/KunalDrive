@@ -134,3 +134,4 @@ export function updateProfile(req, res) {
     return res.status(500).json({ error: 'Internal server error updating profile.' });
   }
 }
+

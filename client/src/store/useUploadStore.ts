@@ -110,3 +110,4 @@ export const useUploadStore = create<UploadState>((set, get) => ({
   toggleMinimized: () => set({ isMinimized: !get().isMinimized }),
   close: () => set({ isOpen: false, queue: [] })
 }));
+

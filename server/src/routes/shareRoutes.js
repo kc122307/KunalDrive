@@ -20,3 +20,4 @@ router.get('/file/:fileId', getSharesForFile);
 router.delete('/:id', revokeShare);
 
 export default router;
+

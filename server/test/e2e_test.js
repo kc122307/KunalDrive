@@ -55,10 +55,11 @@ async function runTests() {
     assert(regRes.status === 201 && regData.user.email === testEmail, 'User registration succeeds and generates profile');
 
     // 4. Create Folder
+    const testFolderName = `Test Workspace ${Date.now()}`;
     const createFolderRes = await fetch(`${BASE_URL}/folders`, {
       method: 'POST',
       headers: { ...authHeaders, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'Test Project Workspace', parent_id: null })
+      body: JSON.stringify({ name: testFolderName, parent_id: null })
     });
     const folderData = await createFolderRes.json();
     assert(createFolderRes.status === 201 && !!folderData.folder.id, 'Folder creation in My Drive succeeds');
@@ -81,7 +82,7 @@ async function runTests() {
     assert(
       breadcrumbData.breadcrumbs.length === 3 &&
       breadcrumbData.breadcrumbs[0].name === 'My Drive' &&
-      breadcrumbData.breadcrumbs[1].name === 'Test Project Workspace' &&
+      breadcrumbData.breadcrumbs[1].name === testFolderName &&
       breadcrumbData.breadcrumbs[2].name === 'Subfolder Alpha',
       'Hierarchical breadcrumb path resolution succeeds'
     );
@@ -221,7 +222,36 @@ async function runTests() {
     const restoreData = await restoreRes.json();
     assert(restoreData.is_trashed === 0, 'Item successfully restored from Trash');
 
-    // 18. Permanent Deletion
+    // 18. Batch Operations
+    // 18a. Batch Download (ZIP)
+    const batchZipRes = await fetch(`${BASE_URL}/files/download-batch`, {
+      method: 'POST',
+      headers: { ...authHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [textFile.id, csvFile.id] })
+    });
+    assert(
+      batchZipRes.status === 200 &&
+      batchZipRes.headers.get('content-type') === 'application/zip',
+      'Batch download multi-selection as ZIP archive succeeds'
+    );
+
+    // 18b. Batch Star
+    const batchStarRes = await fetch(`${BASE_URL}/files/batch-star`, {
+      method: 'POST',
+      headers: { ...authHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [textFile.id, csvFile.id], is_starred: 1 })
+    });
+    assert(batchStarRes.status === 200, 'Batch star operation succeeds across multiple items');
+
+    // 18c. Batch Move
+    const batchMoveRes = await fetch(`${BASE_URL}/files/batch-move`, {
+      method: 'POST',
+      headers: { ...authHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [textFile.id], target_parent_id: subfolderData.folder.id })
+    });
+    assert(batchMoveRes.status === 200, 'Batch move operation moves selected items to target folder');
+
+    // 19. Permanent Deletion
     const permRes = await fetch(`${BASE_URL}/files/${copyData.file.id}/permanent`, {
       method: 'DELETE',
       headers: authHeaders
@@ -240,3 +270,4 @@ async function runTests() {
 }
 
 runTests();
+

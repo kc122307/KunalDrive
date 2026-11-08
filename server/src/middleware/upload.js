@@ -34,3 +34,4 @@ export const uploadMiddleware = multer({
     fileSize: parseInt(process.env.MAX_FILE_SIZE || '5368709120', 10) // 5GB limit
   }
 });
+

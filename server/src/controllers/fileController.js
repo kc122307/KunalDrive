@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
+import archiver from 'archiver';
 import { db } from '../config/database.js';
 import { detectMimeType, getFileCategory, FOLDER_MIME_TYPE } from '../utils/fileTypes.js';
 import { UPLOADS_DIR, TEMP_UPLOADS_DIR } from '../middleware/upload.js';
@@ -757,3 +758,122 @@ export function searchFiles(req, res) {
     return res.status(500).json({ error: 'Internal server error searching files.' });
   }
 }
+
+export function downloadBatchZip(req, res) {
+  try {
+    const userId = req.user.id;
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'No item IDs provided for batch download.' });
+    }
+
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="Drive_Download_${Date.now()}.zip"`);
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    archive.on('error', (err) => {
+      console.error('[Batch Zip Error]', err);
+      if (!res.headersSent) {
+        res.status(500).send({ error: 'Error generating batch zip archive.' });
+      }
+    });
+
+    archive.pipe(res);
+
+    function addFolderRecursively(currentFolderId, currentPath = '') {
+      const items = db.prepare(`
+        SELECT id, name, is_folder, storage_path
+        FROM files
+        WHERE user_id = ? AND parent_id = ? AND is_trashed = 0
+      `).all(userId, currentFolderId);
+
+      for (const item of items) {
+        const itemPath = currentPath ? `${currentPath}/${item.name}` : item.name;
+        if (item.is_folder) {
+          addFolderRecursively(item.id, itemPath);
+        } else if (item.storage_path) {
+          const absolutePath = path.resolve(UPLOADS_DIR, path.basename(item.storage_path));
+          if (fs.existsSync(absolutePath)) {
+            archive.file(absolutePath, { name: itemPath });
+          }
+        }
+      }
+    }
+
+    for (const id of ids) {
+      const item = db.prepare('SELECT id, name, is_folder, storage_path FROM files WHERE id = ? AND user_id = ? AND is_trashed = 0').get(id, userId);
+      if (item) {
+        if (item.is_folder) {
+          addFolderRecursively(item.id, item.name);
+        } else if (item.storage_path) {
+          const absolutePath = path.resolve(UPLOADS_DIR, path.basename(item.storage_path));
+          if (fs.existsSync(absolutePath)) {
+            archive.file(absolutePath, { name: item.name });
+          }
+        }
+      }
+    }
+
+    archive.finalize();
+  } catch (error) {
+    console.error('[Files downloadBatchZip error]', error);
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Internal server error creating batch zip.' });
+    }
+  }
+}
+
+export function batchMove(req, res) {
+  try {
+    const userId = req.user.id;
+    const { ids, target_parent_id } = req.body;
+    const newParentId = (target_parent_id === 'root' || !target_parent_id || target_parent_id === 'null') ? null : target_parent_id;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'No item IDs provided.' });
+    }
+
+    if (newParentId) {
+      const parent = db.prepare('SELECT id, is_folder, is_trashed FROM files WHERE id = ? AND user_id = ?').get(newParentId, userId);
+      if (!parent || !parent.is_folder || parent.is_trashed) {
+        return res.status(400).json({ error: 'Target parent folder not found or trashed.' });
+      }
+    }
+
+    const now = new Date().toISOString();
+    for (const id of ids) {
+      // Prevent moving folder into itself
+      if (id === newParentId) continue;
+      db.prepare('UPDATE files SET parent_id = ?, updated_at = ? WHERE id = ? AND user_id = ?').run(newParentId, now, id, userId);
+    }
+
+    return res.json({ message: `Successfully moved ${ids.length} item(s).` });
+  } catch (error) {
+    console.error('[Files batchMove error]', error);
+    return res.status(500).json({ error: 'Internal server error moving items.' });
+  }
+}
+
+export function batchStar(req, res) {
+  try {
+    const userId = req.user.id;
+    const { ids, is_starred } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'No item IDs provided.' });
+    }
+
+    const starVal = is_starred ? 1 : 0;
+    for (const id of ids) {
+      db.prepare('UPDATE files SET is_starred = ? WHERE id = ? AND user_id = ?').run(starVal, id, userId);
+    }
+
+    return res.json({ message: `Updated star status for ${ids.length} item(s).` });
+  } catch (error) {
+    console.error('[Files batchStar error]', error);
+    return res.status(500).json({ error: 'Internal server error updating stars.' });
+  }
+}
+

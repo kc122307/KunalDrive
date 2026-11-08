@@ -8,3 +8,4 @@ router.use(authenticate);
 router.get('/summary', getStorageSummary);
 
 export default router;
+

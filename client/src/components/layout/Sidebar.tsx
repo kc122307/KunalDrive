@@ -9,7 +9,8 @@ import {
   Clock,
   Star,
   Trash2,
-  Cloud
+  Cloud,
+  X
 } from 'lucide-react';
 import { useDriveStore } from '../../store/useDriveStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -17,7 +18,12 @@ import { useUploadStore } from '../../store/useUploadStore';
 import { formatBytes } from '../../utils/formatters';
 import { ViewMode } from '../../types/drive';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) => {
   const { currentView, setCurrentView, openModal, currentFolder } = useDriveStore();
   const { user } = useAuthStore();
   const { addFilesToQueue } = useUploadStore();
@@ -58,10 +64,21 @@ export const Sidebar: React.FC = () => {
   const storageQuota = user?.storage_quota || 16106127360; // 15 GB
   const percentage = Math.min(100, Math.round((storageUsed / storageQuota) * 100));
 
-  return (
-    <aside className="w-64 shrink-0 bg-[#f8fafd] flex flex-col justify-between h-[calc(100vh-64px)] p-3 select-none">
+  const content = (
+    <div className="flex flex-col justify-between h-full p-3 select-none">
       {/* Top Section */}
       <div className="space-y-4">
+        {/* Mobile Header with close button */}
+        <div className="flex items-center justify-between md:hidden pb-2 border-b border-gray-200">
+          <span className="font-semibold text-sm text-gray-800">Drive Navigation</span>
+          <button
+            onClick={onCloseMobile}
+            className="p-1 rounded-full hover:bg-gray-200 text-gray-500"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
         {/* + New Button */}
         <div className="relative" ref={newMenuRef}>
           <button
@@ -79,6 +96,7 @@ export const Sidebar: React.FC = () => {
                 onClick={() => {
                   setIsNewMenuOpen(false);
                   openModal('create-folder');
+                  onCloseMobile?.();
                 }}
                 className="w-full flex items-center gap-3.5 px-4 py-2.5 hover:bg-[#f0f4f9] text-left transition-colors"
               >
@@ -91,6 +109,7 @@ export const Sidebar: React.FC = () => {
               <button
                 onClick={() => {
                   fileInputRef.current?.click();
+                  onCloseMobile?.();
                 }}
                 className="w-full flex items-center gap-3.5 px-4 py-2.5 hover:bg-[#f0f4f9] text-left transition-colors"
               >
@@ -101,6 +120,7 @@ export const Sidebar: React.FC = () => {
               <button
                 onClick={() => {
                   folderInputRef.current?.click();
+                  onCloseMobile?.();
                 }}
                 className="w-full flex items-center gap-3.5 px-4 py-2.5 hover:bg-[#f0f4f9] text-left transition-colors"
               >
@@ -136,7 +156,10 @@ export const Sidebar: React.FC = () => {
             return (
               <button
                 key={item.view}
-                onClick={() => setCurrentView(item.view)}
+                onClick={() => {
+                  setCurrentView(item.view);
+                  onCloseMobile?.();
+                }}
                 className={`w-full flex items-center gap-4 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-[#c2e7ff] text-[#001d35]'
@@ -173,12 +196,34 @@ export const Sidebar: React.FC = () => {
         </p>
 
         <button
-          onClick={() => openModal('storage')}
+          onClick={() => {
+            openModal('storage');
+            onCloseMobile?.();
+          }}
           className="w-full py-1.5 px-3 border border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-xs font-medium text-[#1a73e8] rounded-full transition-all text-center block"
         >
           Manage storage
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <aside className="w-64 shrink-0 bg-[#f8fafd] hidden md:flex flex-col h-[calc(100vh-64px)]">
+        {content}
+      </aside>
+
+      {/* Mobile Drawer with Overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden bg-black/40 backdrop-blur-xs flex">
+          <div className="w-72 bg-[#f8fafd] h-full shadow-2xl animate-fade-in">
+            {content}
+          </div>
+          <div className="flex-1" onClick={onCloseMobile} />
+        </div>
+      )}
+    </>
   );
 };

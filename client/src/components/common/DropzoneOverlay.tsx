@@ -30,3 +30,4 @@ export const DropzoneOverlay: React.FC<DropzoneOverlayProps> = ({ isDragging }) 
     </div>
   );
 };
+

@@ -7,6 +7,7 @@ import { FileGrid } from './components/workspace/FileGrid';
 import { FileList } from './components/workspace/FileList';
 import { DropzoneOverlay } from './components/common/DropzoneOverlay';
 import { UploadManager } from './components/upload/UploadManager';
+import { ToastContainer } from './components/common/Toast';
 import { CreateFolderModal } from './components/modals/CreateFolderModal';
 import { RenameModal } from './components/modals/RenameModal';
 import { MoveModal } from './components/modals/MoveModal';
@@ -14,17 +15,42 @@ import { ShareModal } from './components/modals/ShareModal';
 import { StorageModal } from './components/modals/StorageModal';
 import { FilePreviewModal } from './components/modals/FilePreviewModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { PublicSharedView } from './components/workspace/PublicSharedView';
 
 import { useAuthStore } from './store/useAuthStore';
 import { useDriveStore } from './store/useDriveStore';
 import { useUploadStore } from './store/useUploadStore';
+import { useToastStore } from './store/useToastStore';
 
 export const App: React.FC = () => {
   const { checkAuth, isAuthenticated, isLoading: authLoading } = useAuthStore();
-  const { fetchItems, layoutMode, clearSelection, currentFolder } = useDriveStore();
+  const {
+    fetchItems,
+    layoutMode,
+    clearSelection,
+    currentFolder,
+    selectedIds,
+    selectedItem,
+    selectAll,
+    trashSelected,
+    openModal,
+    setCurrentFolder
+  } = useDriveStore();
   const { addFilesToQueue } = useUploadStore();
+  const { showToast } = useToastStore();
 
   const [isDragging, setIsDragging] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [sharedToken, setSharedToken] = useState<string | null>(null);
+
+  // Check URL params for shared link access (e.g. ?sharedToken=...)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('sharedToken') || urlParams.get('token');
+    if (token) {
+      setSharedToken(token);
+    }
+  }, []);
 
   useEffect(() => {
     checkAuth();
@@ -36,6 +62,51 @@ export const App: React.FC = () => {
     }
   }, [isAuthenticated]);
 
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Don't trigger if user is typing in an input or textarea
+      const target = e.target as HTMLElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+
+      // Select All (Ctrl+A / Cmd+A)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        selectAll();
+        showToast('All items selected', 'info');
+      }
+
+      // Delete / Backspace (Trash selected)
+      if (e.key === 'Delete' || (e.key === 'Backspace' && (e.metaKey || e.ctrlKey))) {
+        if (selectedIds.length > 0) {
+          e.preventDefault();
+          const count = selectedIds.length;
+          trashSelected();
+          showToast(`${count} item(s) moved to trash`, 'info');
+        }
+      }
+
+      // Escape (Clear selection)
+      if (e.key === 'Escape') {
+        clearSelection();
+      }
+
+      // Enter (Open item if single item selected)
+      if (e.key === 'Enter') {
+        if (selectedIds.length === 1 && selectedItem) {
+          if (selectedItem.is_folder) {
+            setCurrentFolder(selectedItem.id);
+          } else {
+            openModal('preview', selectedItem);
+          }
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIds, selectedItem]);
+
   // Global Drag and Drop listeners
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -46,7 +117,6 @@ export const App: React.FC = () => {
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Only turn off if leaving window bounds
     if (e.clientX <= 0 || e.clientY <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
       setIsDragging(false);
     }
@@ -59,8 +129,22 @@ export const App: React.FC = () => {
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       addFilesToQueue(e.dataTransfer.files, currentFolder?.id);
+      showToast(`Uploading ${e.dataTransfer.files.length} file(s)...`, 'info');
     }
   };
+
+  // If viewing a public shared link, render the dedicated public share portal
+  if (sharedToken) {
+    return (
+      <PublicSharedView
+        token={sharedToken}
+        onExit={() => {
+          setSharedToken(null);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }}
+      />
+    );
+  }
 
   if (authLoading) {
     return (
@@ -85,19 +169,22 @@ export const App: React.FC = () => {
       onDrop={handleDrop}
       className="h-screen w-screen flex flex-col bg-[#f8fafd] overflow-hidden select-none font-sans"
     >
-      <Header />
+      <Header onToggleMobileMenu={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} />
 
       <div className="flex-1 flex overflow-hidden">
-        <Sidebar />
+        <Sidebar
+          mobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        />
 
         {/* Main Workspace Frame (Google Drive rounded container) */}
         <main
           onClick={clearSelection}
-          className="flex-1 mr-4 mb-4 bg-white rounded-3xl border border-gray-200/80 shadow-xs flex flex-col overflow-hidden relative"
+          className="flex-1 mr-0 md:mr-4 mb-0 md:mb-4 bg-white rounded-none md:rounded-3xl border-0 md:border border-gray-200/80 shadow-xs flex flex-col overflow-hidden relative"
         >
           <Breadcrumbs />
 
-          <div className="flex-1 overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
             {layoutMode === 'grid' ? <FileGrid /> : <FileList />}
           </div>
         </main>
@@ -110,6 +197,9 @@ export const App: React.FC = () => {
 
       {/* Floating Upload Progress Drawer */}
       <UploadManager />
+
+      {/* Floating Toast Notification Container */}
+      <ToastContainer />
 
       {/* Modals */}
       <CreateFolderModal />

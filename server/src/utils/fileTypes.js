@@ -68,3 +68,4 @@ export function getFileCategory(mimeType, filename = '') {
 export function detectMimeType(filename, defaultMime = 'application/octet-stream') {
   return mime.lookup(filename) || defaultMime;
 }
+

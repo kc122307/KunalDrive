@@ -90,3 +90,4 @@ export interface UploadItem {
   status: 'pending' | 'uploading' | 'completed' | 'error';
   error?: string;
 }
+

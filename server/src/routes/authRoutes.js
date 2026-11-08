@@ -10,3 +10,4 @@ router.get('/me', authenticate, getMe);
 router.patch('/profile', authenticate, updateProfile);
 
 export default router;
+
