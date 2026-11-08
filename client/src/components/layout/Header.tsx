@@ -110,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
     },
     {
       id: 3,
-      title: 'Welcome to Google Drive',
+      title: 'Welcome to Kunal Drive',
       desc: 'All changes sync persistently to SQLite disk database',
       time: '1h ago',
       icon: <Clock className="w-4 h-4 text-amber-600" />
@@ -138,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
             <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
             <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
           </svg>
-          <span className="text-xl font-normal text-[#444746] tracking-tight hidden sm:inline">Drive</span>
+          <span className="text-xl font-normal text-[#444746] tracking-tight hidden sm:inline">Kunal Drive</span>
         </div>
 
         {/* Omnibox Search Bar */}
@@ -157,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                 type="text"
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
-                placeholder="Search in Drive"
+                placeholder="Search in Kunal Drive"
                 className="w-full bg-transparent border-none outline-none py-2 text-xs sm:text-sm text-[#1f1f1f] placeholder:text-[#444746]"
               />
 
@@ -284,7 +284,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
               <div className="absolute right-0 top-12 w-80 bg-white rounded-3xl shadow-2xl border border-gray-200 p-4 z-50 animate-fade-in text-[#1f1f1f]">
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                   <h4 className="font-medium text-sm">Notifications</h4>
-                  <span className="text-[11px] text-blue-600 font-medium">Drive Activity</span>
+                  <span className="text-[11px] text-blue-600 font-medium">Kunal Drive Activity</span>
                 </div>
                 <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
                   {notifications.map((n) => (

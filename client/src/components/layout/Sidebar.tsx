@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
       <div className="space-y-4">
         {/* Mobile Header with close button */}
         <div className="flex items-center justify-between md:hidden pb-2 border-b border-gray-200">
-          <span className="font-semibold text-sm text-gray-800">Drive Navigation</span>
+          <span className="font-semibold text-sm text-gray-800">Kunal Drive Navigation</span>
           <button
             onClick={onCloseMobile}
             className="p-1 rounded-full hover:bg-gray-200 text-gray-500"

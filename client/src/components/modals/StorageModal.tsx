@@ -115,7 +115,7 @@ export const StorageModal: React.FC = () => {
             {/* Largest Files Table */}
             <div>
               <h4 className="text-sm font-semibold text-[#1f1f1f] mb-3">
-                Largest files in Drive
+                Largest files in Kunal Drive
               </h4>
               <div className="border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100 text-xs">
                 {summary.largestFiles.length === 0 ? (

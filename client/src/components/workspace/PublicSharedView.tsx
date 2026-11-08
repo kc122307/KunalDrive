@@ -53,7 +53,7 @@ export const PublicSharedView: React.FC<PublicSharedViewProps> = ({ token, onExi
           onClick={onExit}
           className="px-6 py-2.5 bg-[#0b57d0] text-white rounded-full text-sm font-medium shadow-sm hover:bg-[#0842a0]"
         >
-          Go to Google Drive
+          Go to Kunal Drive
         </button>
       </div>
     );
@@ -75,14 +75,14 @@ export const PublicSharedView: React.FC<PublicSharedViewProps> = ({ token, onExi
             <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
             <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
           </svg>
-          <span className="text-lg font-medium text-gray-800">Shared Drive Item</span>
+          <span className="text-lg font-medium text-gray-800">Shared Kunal Drive Item</span>
         </div>
 
         <button
           onClick={onExit}
           className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-xs font-medium text-gray-800 rounded-full transition-colors"
         >
-          Sign in to Drive
+          Sign in to Kunal Drive
         </button>
       </header>
 
@@ -158,3 +158,4 @@ export const PublicSharedView: React.FC<PublicSharedViewProps> = ({ token, onExi
     </div>
   );
 };
+

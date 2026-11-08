@@ -9,7 +9,7 @@ const BASE_URL = 'http://localhost:5000/api';
 
 async function runTests() {
   console.log('====================================================');
-  console.log('🧪 Starting Full E2E Test Suite for Google Drive Clone');
+  console.log('🧪 Starting Full E2E Test Suite for Kunal Drive');
   console.log('====================================================\n');
 
   let passed = 0;

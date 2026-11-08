@@ -49,7 +49,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'Google Drive Clone Backend API'
+    service: 'Kunal Drive Backend API'
   });
 });
 
@@ -105,7 +105,7 @@ app.use((err, req, res, next) => {
 seedDemoDataIfEmpty().then(() => {
   app.listen(PORT, () => {
     console.log(`===============================================`);
-    console.log(`🚀 Google Drive Clone Server running on port ${PORT}`);
+    console.log(`🚀 Kunal Drive Server running on port ${PORT}`);
     console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
     console.log(`===============================================`);
   });
